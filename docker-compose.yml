@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:14
+    container_name: db-app
+    restart: unless-stopped
+    ports:
+      - 5433:5432
+    environment:
+      # POSTGRES_PASSWORD: jERbv2XhUR
+      POSTGRES_HOST_AUTH_METHOD: trust
+      # PGDATA: /var/lib/postgresql/data/pgdata
+      PGDATA: /data/postgresql-exist
+    volumes:
+      - ./db-data/14/main:/data/postgresql-exist
+      - ./db-data/test:/data/postgresql

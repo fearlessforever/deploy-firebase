@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login: Test App ~ Express</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"> -->
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- icheck bootstrap -->
+  <link rel="stylesheet" href="/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/plugins/global/plugins.bundle.css">
+  <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/assets/css/adminlte.min.css">
+</head>
+<body class="hold-transition login-page min-vh-100">
+<div class="login-box">
+  <div class="login-logo">
+    <a href="/"><b>Admin</b>LTE <strong class="ms-3 fw-bolder">HeL</strong></a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Sign in to start your session</p>
+
+      <form action="/assets/index3.html" method="post" data-redirect-url="/dashboard">
+        <div class="input-group mb-3">
+          <input type="email" class="form-control" name="username" placeholder="Email">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-envelope"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" class="form-control" name="password" placeholder="Password">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div className="fv-row mb-7 col-12 col-lg-6">
+          <label className="required fw-semibold fs-6 mb-2">Password</label>
+          <input type="password" name="password" className="form-control form-control-solid mb-3 mb-lg-0" placeholder="Password" />
+        </div> -->
+
+        <div class="row">
+          <div class="col-8">
+            <div class="icheck-primary">
+              <input type="checkbox" id="remember">
+              <label for="remember">
+                Remember Me
+              </label>
+            </div>
+          </div>
+          <!-- /.col -->
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+          </div>
+          <!-- /.col -->
+        </div>
+      </form>
+
+      <div class="social-auth-links text-center mb-3">
+        <p>- OR -</p>
+        <a href="#" class="btn btn-block btn-primary disabled">
+          <i class="fab fa-facebook mr-2"></i> Sign in using Facebook
+        </a>
+        <a href="#" class="btn btn-block btn-danger disabled">
+          <i class="fab fa-google-plus mr-2"></i> Sign in using Google+
+        </a>
+      </div>
+      <!-- /.social-auth-links -->
+
+      <p class="mb-1">
+        <a href="forgot-password.html" class="btn-link disabled">I forgot my password</a>
+      </p>
+      <p class="mb-0">
+        <a href="register.html" class="btn-link disabled text-center">Register a new membership</a>
+      </p>
+    </div>
+    <!-- /.login-card-body -->
+  </div>
+</div>
+<!-- /.login-box -->
+
+<!-- jQuery -->
+<script src="/assets/plugins/global/plugins.bundle.js"></script>
+<script src="/assets/js/core.js"></script>
+<!-- <script src="/assets/plugins/jquery/jquery.min.js"></script> -->
+<!-- Bootstrap 4 -->
+<!-- <script src="/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script> -->
+<!-- AdminLTE App -->
+<!-- <script src="/assets/js/adminlte.min.js"></script> -->
+<script>
+  $(document).ready(function(){
+    const form = document.querySelector('body .login-box form')
+    form.addEventListener('submit', async function(e){
+      e.preventDefault()
+
+      try{
+        const _validationFieldsRules = {
+          'username': {
+            validators: {
+              regexp: {
+                regexp: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'The value is not a valid email address',
+              },
+              notEmpty: {
+                message: 'Email address is required'
+              }
+            }
+          },
+          'password': {
+            validators: {
+              notEmpty: {
+                  message: 'Password is required'
+              },
+              // stringLength:{
+              //   message:'Password must be at least 7 characters',
+              //   min:7,
+              // },
+            }
+          },
+        }
+
+        const validation = FormValidation.formValidation(
+          form  ,
+          // document.querySelector('body .login-box form')  ,
+          {
+            fields: _validationFieldsRules ,
+            plugins: {
+                trigger: new FormValidation.plugins.Trigger(),
+                // bootstrap: new FormValidation.plugins.Bootstrap5({
+                //     rowSelector: '.fv-row',
+                //     eleInvalidClass: '',  // comment to enable invalid state icons
+                //     eleValidClass: '' // comment to enable valid state icons
+                // })
+            }
+          }
+        )
+        
+        const validationResult = await validation.validate()
+        if( validationResult === 'Invalid' )
+        throw new Error('Invalid Form: Please check your email & password again')
+        
+        const params = coreParams.getFormParams(e)
+        const resultAuth = await axios.post('/api/auth',params).then(({data}) => data )
+        Swal.fire({
+          text: "You have successfully logged in!",
+          icon: "success",
+          buttonsStyling: false,
+          confirmButtonText: "Ok, got it!",
+          customClass: {
+              confirmButton: "btn btn-primary"
+          }
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                form.querySelector('[name="username"]').value = "";
+                form.querySelector('[name="password"]').value = "";
+
+                //form.submit(); // submit form
+                let redirectUrl = form.getAttribute('data-redirect-url');
+                if (redirectUrl) {
+                    location.href = redirectUrl;
+                }
+            }
+        });
+
+        handleSuccess(resultAuth?.message || 'Ok')
+
+        // _validation.validate()
+      
+
+        const formData = new FormData()
+        // for(let k in values){
+        //   if(typeof (values as any)[k] !== 'undefined')
+        //     formData.set(k , (values as any)[k])
+        // }
+
+        // console.log(e)
+      }catch(error){
+        handleError(error)
+      }
+    })
+    
+  })
+</script>
+</body>
+</html>
